@@ -15,7 +15,7 @@ int main(void) {
     int interestingValues[INTERESING_VALUES_SIZE] = {0, 1, 10, 100};
     int interestingValuesIndex[INTERESING_VALUES_SIZE];
 
-    for (int i = 0; i < INTERESING_VALUES_SIZE; ++i) {
+    for (i = 0; i < INTERESING_VALUES_SIZE; ++i) {
         interestingValuesIndex[i] = VALUES_SIZE;
     }
 
@@ -23,7 +23,7 @@ int main(void) {
 
     for (i = 0; i < VALUES_SIZE; i++) {
         values[i] = rand() % (MAX_RAND - MIN_RAND + 1) + MIN_RAND;
-        for (int j = 0; j < INTERESING_VALUES_SIZE; j++) {
+        for (j = 0; j < INTERESING_VALUES_SIZE; j++) {
             if (values[i] == interestingValues[j]) {
                 if (i < interestingValuesIndex[j]) {
                     interestingValuesIndex[j] = i;
@@ -32,7 +32,7 @@ int main(void) {
         }
     }
 
-    for (int i = 0; i < INTERESING_VALUES_SIZE; ++i) {
+    for (i = 0; i < INTERESING_VALUES_SIZE; ++i) {
         if (interestingValuesIndex[i] != VALUES_SIZE) {
             printf("Indice del primer %d es : %d\n", interestingValues[i], interestingValuesIndex[i]);
         }
