@@ -229,7 +229,7 @@ void generateEmailAddress(char *str) {
     fgets(name, 20, stdin);//It doesn't work well with more than 20 long strings, don't know how to fix
     printf("Ingrese apellido\n");
     fgets(surname, 20, stdin);
-
+    //Don't check if name it's all letters because there are very weird names
     *(str) = *name;
     for (i = 1; i <= 8 && *(surname + i - 1) != 10; i++) {
         *(str + i) = *(surname + i - 1);
