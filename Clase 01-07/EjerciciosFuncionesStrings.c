@@ -43,9 +43,12 @@ char startsWith(char *, char *);
 
 int countWordsRepetition(char *, char *);
 
+void removeConsecutiveSpaces(char *);
+
+char isAnEmail(char *);
 
 int main() {
-    char string[STRING_LENGTH] = "Hola soy  yo yo yo yo";
+    char string[STRING_LENGTH] = "yo Hola soyo     yo yo yoyo yo";
     char stringB[STRING_LENGTH] = "yo";
     //emptyString(string, 10);
     //invertString(string);
@@ -53,6 +56,7 @@ int main() {
     //strToLowerCase(string);
     //capitalizeFirstLetter(string);
     //removeBlankSpaces(string);
+    removeConsecutiveSpaces(string);
     //generateEmailAddress(string);
     //myStrCat(string, stringB);
     for (int i = 0; i < STRING_LENGTH; ++i) {
@@ -60,7 +64,8 @@ int main() {
     }
     //printf("\n%d words", countWords(string));
     //printf("\nStarts with: %d", startsWith(string, stringB));
-    //printf("\nString B repeition on string A: %d", countWordsRepetition(string, stringB));
+    printf("\nString B repeition on string A: %d", countWordsRepetition(string, stringB));
+    printf("\nString is an email: %d", isAnEmail(string));
 
 
 
@@ -224,18 +229,17 @@ void capitalizeFirstLetter(char *str) {
 
 /**Expecting to get a string ending with 0*/
 void removeBlankSpaces(char *str) {
-    int i = 0;
     int j;
 
-    while (*(str + i)) {
-        while (*(str + i) == 32) {
-            j = i;
+    while (*str) {
+        while (*str == 32) {
+            j = 0;
             while (*(str + j)) {
                 *(str + j) = *(str + j + 1);
                 j++;
             }
         }
-        i++;
+        str++;
     }
 }
 
@@ -334,21 +338,25 @@ int countWordsRepetition(char *strA, char *strB) {
     int rep = 0;
     int i = 0;
     char isSameWord = 1;
+    char flag = 1;
 
     if (myStrLen(strA) > myStrLen(strB)) {
-        while (*strA) {//TODO no funca
-            if (*strA == *strB) {
+        while (*strA) {
+            if ((flag || *(strA - 1) == 32) && *strA == *strB) {
+                flag = 0;
                 while (*(strB + i) && isSameWord) {
                     if (*(strB + i) != *(strA + i)) {
                         isSameWord = 0;
                     }
-                    i++;//TODO: Falta, cuenta cuando una parte del string se repite
-                    //strA++;
+                    i++;
+                }
+
+                if (isSameWord) {
+                    if (*(strA + i) == 32 || *(strA + i) == 0) {
+                        rep++;
+                    }
                 }
                 i = 0;
-                if (isSameWord) {
-                    rep++;
-                }
                 isSameWord = 1;
             }
 
@@ -362,4 +370,37 @@ int countWordsRepetition(char *strA, char *strB) {
     return rep;
 }
 
+void removeConsecutiveSpaces(char *str) {
+    int j;
 
+    while (*str) {
+        while (*str == 32 && *(str + 1) == 32) {
+            j = 0;
+            while (*(str + j)) {
+                *(str + j) = *(str + j + 1);
+                j++;
+            }
+        }
+        str++;
+    }
+}
+
+/**Returns 1 if the string has only one @ and at least one . afterwards*/
+char isAnEmail(char *str) {
+    char isAnEmail = 0;
+    int atCount = 0;
+
+    while (*str) {
+        if (*str == 64) {
+            atCount++;
+        }
+        if (atCount == 1 && *str == '.') {
+            isAnEmail = 1;
+        }
+        str++;
+    }
+    if (atCount != 1) {
+        isAnEmail = 0;
+    }
+    return isAnEmail;
+}
