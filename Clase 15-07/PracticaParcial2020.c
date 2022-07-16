@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-#define TAMAÑO_MAXIMO 20
+#define TAMAÑO_MAXIMO 50
 
 int desplazarLetras(char *, char *);
 
@@ -17,7 +17,7 @@ int esEncriptable(char *);
 
 int main(int argc, char *argv[]) {
     char str1[TAMAÑO_MAXIMO];
-    //char str2[TAMAÑO_MAXIMO];
+    char str2[TAMAÑO_MAXIMO];
     //char str3[TAMAÑO_MAXIMO];
     //int desplazamiento;
 
@@ -25,11 +25,11 @@ int main(int argc, char *argv[]) {
     fgets(str1, TAMAÑO_MAXIMO, stdin);
     if (!esEncriptable(str1)) {
         desplazarLetras(str1, str1);
-        encriptarNumeros(str1, str1);
-        printf("String encriptado: %s\n", str1);
+        encriptarNumeros(str1, str2);
+        printf("String encriptado: %s\n", str2);
     }
     else {
-
+        printf("No es posible encriptar el string\n");
     }
 
 /*  printf("Es encriptable : %d\n", esEncriptable(str1));
@@ -88,6 +88,7 @@ void desencriptarTexto(char *source, char *dest, int desplazamiento) {
 
 void encriptarNumeros(char *source, char *dest) {
     char encriptedChar;
+    int i = 1;
     while (*source) {
         encriptedChar = *source;
         switch (*source) {
@@ -118,6 +119,14 @@ void encriptarNumeros(char *source, char *dest) {
                 encriptedChar = ')';
                 break;
         }
+        if (*(source) >= '0' && *(source) <= '9' && (!(*(source - 1) >= '0' && *(source - 1) <= '9') || i == 1) ||
+            !(*(source) >= '0' && *(source) <= '9') && (*(source - 1) >= '0' && *(source - 1) <= '9')) {
+            for (i = 0; i < strlen(source); ++i) {
+                *(dest + i + 1) = *(source + i);
+            }
+            *dest = '#';
+            dest++;
+        }
         *dest = encriptedChar;
         source++;
         dest++;
@@ -127,7 +136,14 @@ void encriptarNumeros(char *source, char *dest) {
 
 void desencriptarNumero(char *source, char *dest) {
     char encriptedChar;
+    int i;
     while (*source) {
+        if (*source == '#') {
+            for (i = 0; i < strlen(source); ++i) {
+                *(dest + i) = *(source + i + 1);
+            }
+            *source++;
+        }
         encriptedChar = *source;
         switch (*source) {
             case '$':
@@ -158,6 +174,7 @@ void desencriptarNumero(char *source, char *dest) {
                 break;
         }
         *dest = encriptedChar;
+
         source++;
         dest++;
     }
