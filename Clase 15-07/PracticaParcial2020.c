@@ -9,6 +9,8 @@ int desplazarLetras(char *, char *);
 
 void desencriptarTexto(char *, char *, int);
 
+int isANumber(char);
+
 void encriptarNumeros(char *, char *);
 
 void desencriptarNumero(char *, char *);
@@ -27,25 +29,20 @@ int main(int argc, char *argv[]) {
         desplazarLetras(str1, str1);
         encriptarNumeros(str1, str2);
         printf("String encriptado: %s\n", str2);
+        /*desencriptarNumero(str2, str1);
+        printf("String numeros desencriptados: %s\n", str1);*/
     }
     else {
         printf("No es posible encriptar el string\n");
     }
 
-/*  printf("Es encriptable : %d\n", esEncriptable(str1));
-    encriptarNumeros(str2, str2);
-    puts(str2);
-    printf("Número de desplazamientos:%d\n", desplazamiento);
-    desencriptarTexto(str2, str3, desplazamiento);
-    desencriptarNumero(str3, str3);
-    printf("String desencriptado : %s\n", str3);*/
     return 0;
 }
 
 
 int desplazarLetras(char *source, char *dest) {
     int desplazamiento = getpid() % 25 + 1;
-    char encriptedChar;
+    int encriptedChar;
     while (*source) {
         encriptedChar = *source;
         if (*source >= 'A' && *source <= 'Z') {
@@ -86,9 +83,14 @@ void desencriptarTexto(char *source, char *dest, int desplazamiento) {
     *dest = 0;
 }
 
+/**Returns 1 if true, 0 if false*/
+int isANumber(char character) {
+    return character >= '0' && character <= '9';
+}
+
 void encriptarNumeros(char *source, char *dest) {
     char encriptedChar;
-    int i = 1;
+    char firstNumber = 1;
     while (*source) {
         encriptedChar = *source;
         switch (*source) {
@@ -119,11 +121,9 @@ void encriptarNumeros(char *source, char *dest) {
                 encriptedChar = ')';
                 break;
         }
-        if (*(source) >= '0' && *(source) <= '9' && (!(*(source - 1) >= '0' && *(source - 1) <= '9') || i == 1) ||
-            !(*(source) >= '0' && *(source) <= '9') && (*(source - 1) >= '0' && *(source - 1) <= '9')) {
-            for (i = 0; i < strlen(source); ++i) {
-                *(dest + i + 1) = *(source + i);
-            }
+        if (isANumber(*source) && (firstNumber || (!isANumber(*(source - 1)))) ||
+            !isANumber(*source) && isANumber(*(source - 1))) {
+            firstNumber = 0;
             *dest = '#';
             dest++;
         }
@@ -139,10 +139,7 @@ void desencriptarNumero(char *source, char *dest) {
     int i;
     while (*source) {
         if (*source == '#') {
-            for (i = 0; i < strlen(source); ++i) {
-                *(dest + i) = *(source + i + 1);
-            }
-            *source++;
+            source++;
         }
         encriptedChar = *source;
         switch (*source) {
@@ -184,8 +181,9 @@ void desencriptarNumero(char *source, char *dest) {
 /**Returns 0 if true, -1 if not*/
 int esEncriptable(char *str) {
     int isEncriptable = 0;
-    while (!*str && isEncriptable) {
-        if (!(*str >= 'A' && *str <= 'Z' || *str >= 'a' && *str <= 'z' || *str >= '0' && *str <= '9' || *str == ' ')) {
+    while (*str && !isEncriptable) {
+        if (!(*str >= 'A' && *str <= 'Z' || *str >= 'a' && *str <= 'z' || isANumber(*str) || *str == ' ' ||
+              *str == '\n')) {
             isEncriptable = -1;
         }
         str++;
