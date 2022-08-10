@@ -21,16 +21,18 @@ int main(int argc, char *argv[]) {
     char str1[TAMAÑO_MAXIMO];
     char str2[TAMAÑO_MAXIMO];
     //char str3[TAMAÑO_MAXIMO];
-    //int desplazamiento;
+    int desplazamiento;
 
     printf("Ingrese un string a encriptar\n");
     fgets(str1, TAMAÑO_MAXIMO, stdin);
     if (!esEncriptable(str1)) {
-        desplazarLetras(str1, str1);
+        desplazamiento = desplazarLetras(str1, str1);
         encriptarNumeros(str1, str2);
         printf("String encriptado: %s\n", str2);
         /*desencriptarNumero(str2, str1);
         printf("String numeros desencriptados: %s\n", str1);*/
+        desencriptarTexto(str2, str1, desplazamiento);
+        printf("String letras desencriptadas: %s\n", str1);
     }
     else {
         printf("No es posible encriptar el string\n");
@@ -51,7 +53,7 @@ int desplazarLetras(char *source, char *dest) {
                 encriptedChar = 'A' + encriptedChar - 'Z' - 1;
             }
         }
-        if (*source >= 'a' && *source <= 'z') {
+        else if (*source >= 'a' && *source <= 'z') {
             encriptedChar = *source + desplazamiento;
             if (encriptedChar > 'z') {
                 encriptedChar = 'a' + encriptedChar - 'z' - 1;
@@ -74,6 +76,12 @@ void desencriptarTexto(char *source, char *dest, int desplazamiento) {
             unEncriptedChar = *source - desplazamiento;
             if (unEncriptedChar < 'A') {
                 unEncriptedChar = 'Z' + unEncriptedChar - 'A' + 1;
+            }
+        }
+        else if (*source >= 'a' && *source <= 'z') {
+            unEncriptedChar = *source - desplazamiento;
+            if (unEncriptedChar < 'a') {
+                unEncriptedChar = 'z' + unEncriptedChar - 'a' + 1;
             }
         }
         *dest = unEncriptedChar;
