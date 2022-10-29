@@ -18,7 +18,7 @@ int main() {
 }
 
 
-void sigTerm(int sig) {
+void signalHandler(int sig) {
     printf("COSO");
 //    exit(0);
 }
