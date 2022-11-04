@@ -5,11 +5,11 @@
 #include <signal.h>
 
 
-void sigTerm(int);
+void signalHandler(int);
 
 
 int main() {
-    signal(31, sigTerm);
+    signal(31, signalHandler);
 //    while (1) {
 //        sleep(1);
 //    }
