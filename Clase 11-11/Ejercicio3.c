@@ -32,8 +32,8 @@ int main(int argc, char *args[]) {
 
 
         for (j = 0; j < atoi(args[1]); ++j) {
-            pthread_join(threadIds[j], (void **) &power);
-            printf("[Thread %d]2 ^ %d = %d\n", threadIds[j], j, *(int *) power);
+            pthread_join(&threadIds[j], (void **) &power);
+            printf("[Thread %lud]2 ^ %d = %d\n", threadIds[j], j, *(int *) power);
         }
 
     }

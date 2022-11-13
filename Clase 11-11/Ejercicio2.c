@@ -24,7 +24,7 @@ int main(int argc, char *args[]) {
 
     for (j = 1; j < argc; ++j) {
         pthread_join(threadIds[j-1], (void **) &factorial);
-        printf("[Thread %d]Factorial de %s es: %d\n",threadIds[j-1], args[j],  *factorial);
+        printf("[Thread %lud]Factorial de %s es: %d\n",threadIds[j-1], args[j],  *factorial);
 
     }
 
