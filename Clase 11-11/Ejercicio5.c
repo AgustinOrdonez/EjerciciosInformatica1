@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <malloc.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 #define MAXTHREADS 100
@@ -17,53 +18,41 @@ void copyFileToDirectory(FILE *, char *, char *);
 
 void *copyFile(void *);
 
+int movedFiles = 0;
+
 int main(int argc, char *args[]) {
     DIR *dir;
     struct dirent *dirEntry;
-    int movedFiles = 0;
     char *fileNameWithPath;
     pthread_t threadIds[MAXTHREADS];
-    int i;
-    int *returnValue;
-    int *removedSpaces;
 
     if (argc == 2) {
-        dir = opendir(args[1]);
-        if (dir) {
-            while ((dirEntry = readdir(dir)) != NULL) {
+        while (1) {
+            dir = opendir(args[1]);
+            if (dir) {
+                while ((dirEntry = readdir(dir)) != NULL) {
+                    if (strcmp(".", dirEntry->d_name) && strcmp("..", dirEntry->d_name)) {
+                        fileNameWithPath = malloc(strlen(args[1]) + strlen(dirEntry->d_name) + 2);
+                        if (!fileNameWithPath) {
+                            exit(-1);
+                        }
+                        strcpy(fileNameWithPath, args[1]);
+                        strcat(fileNameWithPath, "/");
+                        strcat(fileNameWithPath, dirEntry->d_name);
 
-                if (strcmp(".", dirEntry->d_name) && strcmp("..", dirEntry->d_name)) {
-                    fileNameWithPath = malloc(strlen(args[1]) + strlen(dirEntry->d_name) + 2);
-                    if (!fileNameWithPath) {
-                        exit(-1);
+                        pthread_create(&threadIds[movedFiles], NULL, copyFile, fileNameWithPath);
+                        pthread_detach(threadIds[movedFiles]);
+                        movedFiles++;
                     }
-                    strcpy(fileNameWithPath, args[1]);
-                    strcat(fileNameWithPath, "/");
-                    strcat(fileNameWithPath, dirEntry->d_name);
-
-                    pthread_create(&threadIds[movedFiles], NULL, copyFile, fileNameWithPath);
-
-                    movedFiles++;
                 }
+                closedir(dir);
             }
-
-            closedir(dir);
-
-            returnValue = malloc(4);
-            removedSpaces = malloc(sizeof(int) * movedFiles);
-            for (i = 0; i < movedFiles; ++i) {
-                pthread_join(threadIds[i], (void **) &returnValue);
-                *(removedSpaces + i) = *returnValue;
+            else {
+                printf("El directorio no existe\n");
+                exit(-2);
             }
-
-            printf("Arhchivos movidos:%d\n", movedFiles);//Meterle esto por thread
-            for (i = 0; i < movedFiles; i++) {
-                printf("En el archivo %d: se eliminaron: %d espacios en blanco\n", i, removedSpaces[i]);
-            }
-
-
+            sleep(1);
         }
-
     }
     else {
         printf("Cantidad de argumentos errónea\n");
@@ -158,7 +147,6 @@ void *copyFile(void *fullFilename) {
     char *buff;
     int *blankSpacesRemoved = malloc(sizeof(int));
 
-
     fp = fopen(fullFilename, "r");
 
     if (!fp) {
@@ -168,7 +156,6 @@ void *copyFile(void *fullFilename) {
     buff = NULL;
     writeFileContentIntoBuffer(fp, &buff);
     *blankSpacesRemoved = removeDoubleWhiteSpaces(buff);
-
     fclose(fp);
 
     fp = fopen(fullFilename, "w+");
@@ -178,8 +165,9 @@ void *copyFile(void *fullFilename) {
     copyFileToDirectory(fp, strrchr(fullFilename, '/') + 1, "./output");
     fclose(fp);
 
-    free(buff);
-
     remove(fullFilename);
-    return blankSpacesRemoved;
+    movedFiles--;
+    printf("En el archivo %s: se eliminaron: %d espacios en blanco\n", (char* )fullFilename, *blankSpacesRemoved);
+
+    return NULL;
 }
