@@ -14,7 +14,6 @@ int main(int argc, char *args[]) {
     int i;
     int j;
     int *power;
-    int temp=0;
     pthread_t threadIds[MAXTHREADS];//NOT HANDLED SEGMENTATION FAULT
     int *currPow;
 
@@ -22,8 +21,8 @@ int main(int argc, char *args[]) {
 
 
         for (i = 0; i < atoi(args[1]); ++i) {//NOT HANDLED EXCEPTION
-            currPow= malloc(sizeof(int));
-            *currPow=i;//O no malloc y poner sleep
+            currPow = malloc(sizeof(int));
+            *currPow = i;//O no malloc y poner sleep
             if (pthread_create(&threadIds[i], NULL, calculatePowerOf2, (void *) currPow) != 0) {
                 exit(-1);
             }
