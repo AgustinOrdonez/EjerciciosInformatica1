@@ -28,6 +28,9 @@ int isPartOnList(Part *, PartNode *);
 
 void insertElementSafe(Part *, PartNode **);
 
+
+int deleteElement(Part *element, PartNode **listHead);
+
 int order(Part *, PartNode *);
 
 Part *search(unsigned int partNumber);
@@ -87,7 +90,8 @@ int main(int argc, char *args[]) {
                 *socketId = aceptarPedidos(socketFd);
 
                 pthread_mutex_lock(&mutex);
-                pthread_create(&threadIds[threadCount++], NULL, manageClient, socketId);
+                pthread_create(&threadIds[threadCount], NULL, manageClient, socketId);
+                pthread_detach(threadIds[threadCount++]);
                 pthread_mutex_unlock(&mutex);
             }
             else {
@@ -100,7 +104,6 @@ int main(int argc, char *args[]) {
     else {
         printf("Usage: ./serverAutopartes <archivoCsv>\n");
     }
-
 
     return 0;
 }
@@ -141,9 +144,43 @@ void insertElementSafe(Part *element, PartNode **head) {
     }
 }
 
+/**Returns -1 if element wasn't in the list*/
+int deleteElement(Part *element, PartNode **listHead) {
+    PartNode *currHead = *listHead;
+    int search = 1;
+    PartNode *prevHead;
+    int errCode = 1;
+
+    while (search && (currHead != NULL)) {
+        if (isPartEqual(element, currHead->parteDeAutomovil)) {
+            search = 0;
+
+            //Por si el primer elemento es el que hay que eliminar
+            if ((currHead == *listHead)) {
+                *listHead = currHead->next;
+            }
+            else {
+                prevHead->next = currHead->next;
+            }
+            search = 0;
+            free(currHead->parteDeAutomovil);//Solo si la parte de automovil se asigna con malloc
+            free(currHead);
+        }
+        else {
+            prevHead = currHead;
+            currHead = currHead->next;
+        }
+    }
+    if (search) {
+        errCode = -1;
+    }
+
+    return errCode;
+}
+
 /**Decreaces stock by 1 when possible, returns -1 if stock is already zero*/
 int order(Part *element, PartNode *listHead) {
-    int errCode;
+    int errCode = 1;
 
     while ((listHead) != NULL) {
         if (isPartEqual(element, listHead->parteDeAutomovil)) {
@@ -197,8 +234,7 @@ int retrievePartsFromCsv(PartNode **listHead, char *filename) {
     FILE *fp;
     char buff[500];
     char *token;
-    Part *element = malloc(
-            sizeof(Part));//Esta es la función en la que si este puntero declaro como Part(no puntero) me deja setear los valores pero por algún motivo se pierden los valores con el tiempo
+    Part *element;//Esta es la función en la que si este puntero declaro como Part(no puntero) me deja setear los valores pero por algún motivo se pierden los valores con el tiempo
     int errCode;
 
     if ((fp = fopen(filename, "r")) != NULL) {
@@ -206,7 +242,7 @@ int retrievePartsFromCsv(PartNode **listHead, char *filename) {
         fgets(buff, sizeof buff, fp);
 
         while ((fgets(buff, sizeof buff, fp)) != NULL) {//File has the same order as PartStructure
-
+            element = malloc(sizeof(Part));
             removeEndOfLine(buff);
 
             token = strtok(buff, ",");
@@ -327,6 +363,21 @@ void *manageClient(void *arg) {
             write(*socketId, &state, 1);
         }
     }
+    else if (!strcmp(command, "delete")) {
+        read(*socketId, &partNumber, sizeof(partNumber));
+        partNumber = ntohl(partNumber);
+
+        element->partNumber = partNumber;
+
+        if (deleteElement(element, &head) == -1) {
+            state = 'b';
+        }
+        else {
+            state = 'w';
+        }
+        write(*socketId, &state, 1);
+
+    }
     else {
         //En caso de que el comando no esté se envía x
         state = 'x';
@@ -336,7 +387,8 @@ void *manageClient(void *arg) {
     close(*socketId);
     free(arg);
 
-    free(element);
+    //innecesario por el detach
+//    free(element);
 
     pthread_mutex_lock(&mutex);
     threadCount--;

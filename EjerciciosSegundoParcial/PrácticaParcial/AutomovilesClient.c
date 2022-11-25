@@ -59,11 +59,23 @@ int main(int argc, char *args[]) {
                 printf("El elemento que pidió no se encuentra en stock\n");
             }
         }
+        else if (!strcmp(command, "delete")) {
+            write(socketFd, &partNumber, sizeof(partNumber));
+            read(socketFd, &response, sizeof(char));
+
+            if (response == 'w') {
+                printf("Operación realizada con éxito\n");
+            }
+            else {
+                printf("Operación fallida\n");
+            }
+        }
         else {
             printf("Comando equivocado\n"
                    "Opciones disponibles:\n"
                    "    -search     (Dada un número de parte lista todos los datos del artículo)\n"
-                   "    -order      (Dado un número de parte baja en 1 la cantidad de stock)\n");
+                   "    -order      (Dado un número de parte baja en 1 la cantidad de stock)\n"
+                   "    -delete     (Dado un número de parte lo elimina de la lista)\n");
 
         }
         close(socketFd);
