@@ -184,7 +184,7 @@ int appendToLogFile(Status status) {
 
 
     if ((fp = fopen("status.log", "a")) != NULL) {
-        fprintf(fp, "25-11-2022;23:00;%s; cpu=% %d;memory=% %d\n", status.hostname, status.cpu, status.mem);
+        fprintf(fp, "25-11-2022;23:00;%s; cpu=%% %d;memory=%% %d\n", status.hostname, status.cpu, status.mem);
         fclose(fp);
 
 
